@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js">  </script>
+    <link rel="stylesheet" href="style sheet.css">
+	<meta charset="ISO-8859-1">
+	<title>Show Activity Of Users</title>
+</head>
+<body class="c1">
+<div class="navbar">
+  <a id="HP" href="homePage.html">Home</a>
+  <a id="CIM" href="contactManagement.html">Contact Information Management </a>
+  <a id="UIM" class="active" href="userManagement.html">User Information Management</a>
+  <a id="RIM" href="roleManagement.html">Role Information Management</a>
+  <a id="logout" href="signinPage.html">Logout</a>
+ </div>
+ <br>
+ <br>
+	<div id="div1" style="overflow-x:auto;">
+
+	</div>
+	<p class="error" id="error" ></p>
+	<br>
+
+<form name="myForm" id="f1" >
+ 
+  <label class="clabel" for="username">Username: </label>
+  <input class="ctextbox" type="text" id="username" name="username">
+
+   <label class="clabel" for="password">Password: </label>
+   <input class="ctextbox" type="text" id="password" name="password">
+
+    <label class="clabel" for="role">Role: </label>
+    <input class="ctextbox" type="text" id="role" name="role">
+
+ <br>
+ <br>
+       
+ <button id="UU">Update User</button>
+ <button id="DU">Delete User</button>
+ <button id="UpU">Upgrade User</button>
+ <button id="DU">Downgrade User</button>
+ 
+ </form>
+
+<script type="text/javascript">
+var uname = sessionStorage.getItem("username");
+var pass = sessionStorage.getItem("password");
+var IP =sessionStorage.getItem("IP");
+var port = sessionStorage.getItem("port");
+
+
+function make_base_auth(user, password) {
+	var tok = user + ':' + password;
+	var hash = btoa(tok);
+	return "Basic " + hash;
+}
+        $(document).ready(function () {
+               
+						$.ajax({
+                                url: 'http://' + IP + ':' + port + '/phonebook_server/eventLog',
+								dataType: 'json',
+								contentType: 'application/json; charset=utf-8',
+								type: 'GET',
+								headers: {
+								"Access-Control-Allow-Origin": "*" ,
+								"Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, OPTIONS, HEAD" ,
+								"Access-Control-Allow-Headers": "Authorization, Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Methods, Access-Control-Allow-Origin"
+								},
+								beforeSend: function (xhr){ 
+										xhr.setRequestHeader('Authorization', make_base_auth(uname,pass)); 
+								},
+                                success: function (response) {
+                                	var obj=response;	
+                                	var tbl=$("<table/>").attr("id","mytable");
+   								    $("#div1").append(tbl);
+   								    var th=" <tr><th>ID</th><th>Name</th><th>Level</th><th>Description</th><th>Time</th></tr>";
+   									$("#mytable").append(th);
+    								for(var i=0 ; i < obj.length ; i++)
+    								{
+        								var tr = "<tr>" ;
+        								var td1= "<td>" + obj[i]["id"]+"</td>" ;
+        								var td2= "<td>" + obj[i]["name"]+"</td>" ;
+       								    var td3= "<td>" + obj[i]["level"]+"</td>";
+       								    var td4= "<td>" + obj[i]["description"]+"</td>";
+       								    var td5= "<td>" + obj[i]["time"]+"</td></tr>" ;
+
+      								    $("#mytable").append(tr+td1+td2+td3+td4+td5); 
+      								}
+								},
+								error: function (xhr, errorType, exception) {
+									var responseText;
+									responseText = xhr.responseText;
+									if(responseText){
+										document.getElementById("error").innerHTML = errorType + " : " + exception + "---Error message: "+ responseText;
+									}
+									else{
+										document.getElementById("error").innerHTML = "Error: Invalid IP or port!";
+									}
+								}
+							
+                            });//end of .ajax
+        });
+</script>
+</body>
+</html>

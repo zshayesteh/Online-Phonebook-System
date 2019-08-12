@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <meta name="viewport" content="width=device-width" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js">  </script>
+    <meta charset="utf-8" />
+    <title>User Page Of Public Phonebook System</title>
+    <link rel="stylesheet" href="style sheet.css">
+</head>
+<body class="c1" onload="onLoadFunction()">
+
+<div class="navbar">
+  <a id="HP" class="active" href="homePage.html">Home</a>
+  <a id="CIM" href="contactManagement.html">Contact Information Management </a>
+  <a id="UIM" href="userManagement.html">User Information Management</a>
+  <a id="RIM" href="roleManagement.html">Role Information Management</a>
+  <a id="logout" href="signinPage.html">Logout</a>
+</div>
+
+
+<h1 id="name"></h1>
+<p class="pNote">This is the home page of online public phonebook system. You can access the facilities due to your role in the system, so if some actions doesn't work for you, it's because of your role accessibility.</p>
+
+ <script>
+function onLoadFunction() {
+	document.getElementById("name").innerHTML = "Hello "+ sessionStorage.getItem("username");
+	var role=sessionStorage.getItem("role");;
+	if(role=="simpleUser" || role=="guest"){
+		$("#RIM,#UIM").each(function(){
+		    $(this).click(function(){
+		    	 alert("You cannot access this item due to your role!");
+		    	 return false;
+		    });
+		});
+	}
+	
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js">  </script>
+    <link rel="stylesheet" href="style sheet.css">
+	<meta charset="ISO-8859-1">
+	<title>Show Roles</title>
+</head>
+<body class="c1">
+<div class="navbar">
+  <a id="HP" href="homePage.html">Home</a>
+  <a id="CIM" href="contactManagement.html">Contact Information Management </a>
+  <a id="UIM" href="userManagement.html">User Information Management</a>
+  <a id="RIM" class="active" href="roleManagement.html">Role Information Management</a>
+  <a id="logout" href="signinPage.html">Logout</a>
+ </div>
+ <br>
+ <br>
+	<div id="div1" style="overflow-x:auto;">
+
+	</div>
+	<p class="error" id="error" ></p>
+
+<script type="text/javascript">
+var uname = sessionStorage.getItem("username");
+var pass = sessionStorage.getItem("password");
+var IP =sessionStorage.getItem("IP");
+var port = sessionStorage.getItem("port");
+
+function make_base_auth(user, password) {
+	var tok = user + ':' + password;
+	var hash = btoa(tok);
+	return "Basic " + hash;
+}
+        $(document).ready(function () {
+               
+						$.ajax({
+                                url: 'http://' + IP + ':' + port + '/phonebook_server/role',
+								dataType: 'json',
+								contentType: 'application/json; charset=utf-8',
+								type: 'GET',
+								headers: {
+								"Access-Control-Allow-Origin": "*" ,
+								"Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, OPTIONS, HEAD" ,
+								"Access-Control-Allow-Headers": "Authorization, Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Methods, Access-Control-Allow-Origin"
+								},
+								beforeSend: function (xhr){ 
+										xhr.setRequestHeader('Authorization', make_base_auth(uname,pass)); 
+								},
+                                success: function (response) {
+                                	var obj=response;	
+                                	var tbl=$("<table/>").attr("id","mytable");
+   								    $("#div1").append(tbl);
+   								    var th=" <tr><th>Role Name</th><th>Role Features</th></tr>";
+   									$("#mytable").append(th);
+    								for(var i=0 ; i < obj.length ; i++)
+    								{
+        								var tr = "<tr>" ;
+        								var td1= "<td>" + obj[i]["name"]+"</td>" ;
+        								var features= obj[i]["features"];
+        								var td2= "<td>";
+        								var td3="";
+        								for(var j=0 ; j< features.length ; j++){
+        									td3=td3+features[j]["feature"]+ "<br>";
+        								}
+       								   	td3= td3+"</td></tr>" ;
+
+      								    $("#mytable").append(tr+td1+td2+td3); 
+      								}
+								},
+								error: function (xhr, errorType, exception) {
+									var responseText;
+									responseText = xhr.responseText;
+									if(responseText){
+										document.getElementById("error").innerHTML = errorType + " : " + exception + "---Error message: "+ responseText;
+									}
+									else{
+										document.getElementById("error").innerHTML = "Error: Invalid IP or port!";
+									}
+								}
+							
+                            });//end of .ajax
+        });
+</script>
+</body>
+</html>

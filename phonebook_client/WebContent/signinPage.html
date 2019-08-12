@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js">  </script>
+    <meta charset="utf-8" />
+    <title>Public Phonebook System_Sign In Page</title>
+    <link rel="stylesheet" href="style sheet.css">
+</head>
+
+
+<body class="c1">
+		<p class="header">"Welcome To The Public Phonebook System"</p> 
+        <p class="pNote">
+            "Note: sign up to our system and then sign in to your account,otherwiseif you don't like to register you can sign in as aguest with "guest" keyword as username & password"
+        </p>
+    <form name="myForm" id="f1" >
+        <div class="c5">
+            <label class="label" for="username"> Username : </label>
+            <input type="text" class="signintextbox" id="uname" name="username" placeholder="your username...">
+            <br>
+            <label class="label" for="password">
+                Password :
+            </label>
+            <input type="password" id="pass" name="password" placeholder="your password...">
+            <br>
+
+            <label class="label" for="IP">Server IP :</label>
+            <input type="text" class="signintextbox" id="IP" name="IP" placeholder="server IP..." >
+            <br>
+
+            <label class="label" for="port">Server port :</label>
+            <input type="text" class="signintextbox" id="port" name="port" placeholder="server port...">
+            <br>
+			
+			<p class="error" id="error" ></p>
+			
+            <input type="button" name="operation" id="signin" value="Sign in" /> <br>
+			<br>
+            <input type="button" name="operation" id="signup" value="Sign up" /> <br>
+			<br>
+            
+        </div>
+    </form>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+			function make_base_auth(user, password) {
+				var tok = user + ':' + password;
+				var hash = btoa(tok);
+				return "Basic " + hash;
+			}
+			
+			//**********************************signin****************************************
+            $('#signin').click(function () {
+                var uname = $('#uname').val();
+                var pass = $('#pass').val();
+                var IP = $('#IP').val();
+                var port = $('#port').val();
+                if (uname && pass && IP && port) {
+                   // if (/^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$/.test(IP)) {
+                        if (/^(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3}|0)$/.test(port)) {
+							// declare the object
+							var user = {};
+							// throw some data into the object
+							user.userName = uname;
+							user.password = pass;
+							// convert the object into a json string
+							var user_json = JSON.stringify(user);
+
+							try{
+                            $.ajax({
+                                url: 'http://' + IP + ':' + port + '/phonebook_server/user/signin',
+								dataType: 'json',
+								contentType: 'application/json; charset=utf-8',
+								type: 'POST',
+								headers: {
+								"Access-Control-Allow-Origin": "*" ,
+								"Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, OPTIONS, HEAD" ,
+								"Access-Control-Allow-Headers": "Authorization, Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Methods, Access-Control-Allow-Origin"
+								},
+                                // data to be submit
+								data: user_json,
+								beforeSend: function (xhr){ 
+										xhr.setRequestHeader('Authorization', make_base_auth(uname,pass)); 
+									},
+                                success: function (response) {	
+                                	var jsonstring = JSON.stringify(response);
+									let jsonObject = JSON.parse(jsonstring);
+									var role=jsonObject.name;
+									 // Store
+								    sessionStorage.setItem("IP", IP);
+								    sessionStorage.setItem("port", port);
+								    sessionStorage.setItem("username", uname);
+								    sessionStorage.setItem("password", pass);
+								    sessionStorage.setItem("role", role);
+								   
+									window.location="homePage.html";
+                                },
+								error: function (xhr, errorType, exception) {
+									var responseText;
+									responseText = xhr.responseText;
+									if(responseText){
+										document.getElementById("error").innerHTML = errorType + " : " + exception + "---Error message: "+ responseText;
+									}
+									else{
+										document.getElementById("error").innerHTML = "Error: Invalid IP or port!";
+									}
+								}
+							
+                            });//end of .ajax
+							}//end of try block
+							catch(e){
+								document.getElementById("error").innerHTML = "Exception: " + e;
+							}
+                        }
+                        else {
+						  document.getElementById("error").innerHTML = "Error: Invalid port format!";
+                        }
+                    /* }
+                    else {
+						document.getElementById("error").innerHTML = "Error: Invalid IP format!";
+                    } */
+                }
+                else if (!uname || !pass) {
+					document.getElementById("error").innerHTML = "Error: Both fields of username and password must be fill to sign in!";
+                }
+                else if (!IP || !port) {
+					document.getElementById("error").innerHTML = "Error: Both fields of IP and port must be fill to sign in!";
+                }
+
+            });
+			
+            //**********************************signup****************************************
+
+            $('#signup').click(function () {
+                var uname = $('#uname').val();
+                var pass = $('#pass').val();
+                var IP = $('#IP').val();
+                var port = $('#port').val();
+                if (uname && pass && IP && port) {
+                    if (/^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$/.test(IP)) {
+                        if (/^(6553[0-5]|655[0-2]\d|65[0-4]\d\d|6[0-4]\d{3}|[1-5]\d{4}|[1-9]\d{0,3}|0)$/.test(port)) {
+							// declare the object
+							var user = {};
+							// throw some data into the object
+							user.userName = uname;
+							user.password = pass;
+							// convert the object into a json string
+							var user_json = JSON.stringify(user);
+
+							try{
+                            $.ajax({
+                                url: 'http://' + IP + ':' + port + '/phonebook_server/user/signup',
+								contentType: 'application/json; charset=utf-8',
+								type: 'POST',
+								headers: {
+								"Access-Control-Allow-Origin": "*" ,
+								"Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, OPTIONS, HEAD" ,
+								"Access-Control-Allow-Headers": "Authorization, Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Methods, Access-Control-Allow-Origin"
+								},
+                                // data to be submit
+								data: user_json,
+								beforeSend: function (xhr){ 
+										xhr.setRequestHeader('Authorization', make_base_auth("guest","guest")); 
+									},
+                                success: function (response) {	
+									alert(response);
+								},
+								error: function (xhr, errorType, exception) {
+									var responseText;
+									responseText = xhr.responseText;
+									if(responseText){
+										document.getElementById("error").innerHTML ="Error: " + exception + "_Error message: "+ responseText;
+									}
+									else{
+										document.getElementById("error").innerHTML = "Error: Invalid IP or port!";
+									}
+								}
+							
+                            });//end of .ajax
+							}//end of try block
+							catch(e){
+								document.getElementById("error").innerHTML = "Exception: " + e;
+							}
+                        }
+                        else {
+						  document.getElementById("error").innerHTML = "Error: Invalid port format!";
+                        }
+                    }
+                    else {
+						document.getElementById("error").innerHTML = "Error: Invalid IP format!";
+                    }
+                }
+                else if (!uname || !pass) {
+					document.getElementById("error").innerHTML = "Error: Both fields of username and password must be fill to sign up!";
+                }
+                else if (!IP || !port) {
+					document.getElementById("error").innerHTML = "Error: Both fields of IP and port must be fill to sign up!";
+                }
+
+            });//end of sign up function
+        });
+
+    </script>
+</body>
+</html>

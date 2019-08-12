@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js">  </script>
+    <link rel="stylesheet" href="style sheet.css">
+	<meta charset="utf-8" />
+	<title>Show Contacts</title>
+</head>
+<body class="c1" onload="onLoadFunction()">
+<div class="navbar">
+  <a id="HP" href="homePage.html">Home</a>
+  <a id="CIM" class="active" href="contactManagement.html">Contact Information Management </a>
+  <a id="UIM" href="userManagement.html">User Information Management</a>
+  <a id="RIM" href="roleManagement.html">Role Information Management</a>
+  <a id="logout" href="signinPage.html">Logout</a>
+ </div>
+ <br>
+ <br>
+ 
+<div id="div1" style="overflow-x:auto;">
+
+</div>
+<p class="error" id="error" ></p>
+<br>
+
+<form name="myForm" id="f1" >
+
+ <label class="clabel" for="ID">ID: </label> 
+ <input class="ctextbox" type="text" id="ID" name="ID">
+ 
+  <label class="clabel" for="name">Name: </label>
+  <input class="ctextbox" type="text" id="name" name="name">
+
+   <label class="clabel" for="surname">Surname: </label>
+   <input class="ctextbox" type="text" id="surname" name="surname">
+
+    <label class="clabel" for="homenumber">HomeNumber: </label>
+    <input class="ctextbox" type="text" id="homenumber" name="homenumber">
+
+     <label class="clabel" for="mobile">Mobile: </label>
+     <input class="ctextbox" type="text" id="mobile" name="mobile">
+ 
+      <label class="clabel" for="email">Email: </label>
+      <input class="ctextbox" type="text" id="email" name="email">
+ <br>
+ <br>
+       
+ <button id="AC">Add Contact</button>
+ <button id="UC">Update Contact</button>
+ <button id="DC">Delete Contact</button>
+ <button id="SC">Search Contact</button>
+ 
+ </form>
+ 
+<script type="text/javascript">
+var uname = sessionStorage.getItem("username");
+var pass = sessionStorage.getItem("password");
+var IP =sessionStorage.getItem("IP");
+var port = sessionStorage.getItem("port");
+var role= sessionStorage.getItem("role");
+        $(document).ready(function () {
+               
+						$.ajax({
+                                url: 'http://' + IP + ':' + port + '/phonebook_server/contact/getAll/liteContact',
+								dataType: 'json',
+								contentType: 'application/json; charset=utf-8',
+								type: 'GET',
+								headers: {
+								"Access-Control-Allow-Origin": "*" ,
+								"Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, OPTIONS, HEAD" ,
+								"Access-Control-Allow-Headers": "Authorization, Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Methods, Access-Control-Allow-Origin"
+								},
+								beforeSend: function (xhr){ 
+										xhr.setRequestHeader('Authorization', make_base_auth(uname,pass)); 
+								},
+                                success: function (response) {
+                                	var obj=response;	
+                                	var tbl=$("<table/>").attr("id","mytable");
+   								    $("#div1").append(tbl);
+   								    var th=" <tr><th>ID</th><th>Name</th><th>Surname</th><th>Home Number</th></tr>";
+   									$("#mytable").append(th);
+    								for(var i=0 ; i < obj.length ; i++)
+    								{
+        								var tr = "<tr>" ;
+        								var td1= "<td>" + obj[i]["id"]+"</td>" ;
+        								var td2= "<td>" + obj[i]["name"]+"</td>" ;
+       								    var td3= "<td>" + obj[i]["surname"]+"</td>";
+       								    var td4= "<td>" + obj[i]["homeNumber"]+"</td></tr>" ;
+
+      								    $("#mytable").append(tr+td1+td2+td3+td4); 
+      								}
+								},
+								error: function (xhr, errorType, exception) {
+									var responseText;
+									responseText = xhr.responseText;
+									if(responseText){
+										document.getElementById("error").innerHTML = errorType + " : " + exception + "---Error message: "+ responseText;
+									}
+									else{
+										document.getElementById("error").innerHTML = "Error: Invalid IP or port!";
+									}
+								}
+							
+                            });//end of .ajax
+                            
+			//click on each row of table
+			$(document).on('click', '#mytable tr', function(){
+  			$(this).addClass('selected').siblings().removeClass('selected');    
+   			var ID=$(this).find('td:first').html();
+        	$("#mytable").hide();
+        	
+        	$.ajax({
+                url: 'http://' + IP + ':' + port + '/phonebook_server/contact/' + ID,
+				dataType: 'json',
+				contentType: 'application/json; charset=utf-8',
+				type: 'GET',
+				headers: {
+				"Access-Control-Allow-Origin": "*" ,
+				"Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, OPTIONS, HEAD" ,
+				"Access-Control-Allow-Headers": "Authorization, Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Methods, Access-Control-Allow-Origin"
+				},
+				beforeSend: function (xhr){ 
+						xhr.setRequestHeader('Authorization', make_base_auth(uname,pass)); 
+					},
+                success: function (response) {
+                	var obj1=response;	
+                	var tbl1=$("<table/>").attr("id","row");
+					    $("#div1").append(tbl1);
+					    var th=" <tr><th>ID</th><th>Name</th><th>Surname</th><th>Home Number</th><th>Mobile</th><th>Email</th></tr>";
+						$("#row").append(th);
+						
+						var tr = "<tr>" ;
+						var td1= "<td>" + obj1["id"]+"</td>" ;
+						var td2= "<td>" + obj1["name"]+"</td>" ;
+						var td3= "<td>" + obj1["surname"]+"</td>";
+						var td4= "<td>" + obj1["homeNumber"]+"</td>" ;
+						var td5= "<td>" + obj1["mobile"]+"</td>";
+						var td6= "<td>" + obj1["email"]+"</td></tr>";
+
+						$("#row").append(tr+td1+td2+td3+td4+td5+td6); 
+				},
+				error: function (xhr, errorType, exception) {
+					var responseText;
+					responseText = xhr.responseText;
+					if(responseText){
+						document.getElementById("error").innerHTML = errorType + " : " + exception + "---Error message: "+ responseText;
+					}
+					else{
+						document.getElementById("error").innerHTML = "Error: Invalid IP or port!";
+					}
+				}
+			
+            });//end of .ajax
+        	
+        });//end of clickable row block
+        
+        //add contact
+        $('#AC').click(function () {
+     
+            var name = $('#name').val();
+            var sname = $('#surname').val();
+            var hnumber = $('#homenumber').val();
+            var mobile = $('#mobile').val();
+            var email = $('#email').val();
+
+            if (name && sname && hnumber && mobile && email) {
+						// declare the object
+						var contact = {};
+						// throw some data into the object
+						contact.name = name;
+						contact.surname = sname;
+						contact.homeNumber = hnumber;
+						contact.mobile = mobile;
+						contact.email = email;
+						
+						// convert the object into a json string
+						var contact_json = JSON.stringify(contact);
+						
+						console.log(contact);
+
+						try{
+                        $.ajax({
+                            url: 'http://' + IP + ':' + port + '/phonebook_server/contact',
+							contentType: 'application/json; charset=utf-8',
+							type: 'POST',
+/* 							headers: {
+							"Access-Control-Allow-Origin": "*" ,
+							"Access-Control-Allow-Methods": "GET, POST, DELETE, PUT, OPTIONS, HEAD" ,
+							"Access-Control-Allow-Headers": "Authorization, Content-Type, Access-Control-Allow-Headers, Access-Control-Allow-Methods, Access-Control-Allow-Origin"
+							}, */
+                            // data to be submit
+							data: contact_json,
+							beforeSend: function (xhr){ 
+									xhr.setRequestHeader('Authorization', make_base_auth(uname,pass)); 
+								},
+                            success: function (response) {	
+                            	alert("Contact added successfully!");
+                            },
+							error: function (xhr, errorType, exception) {
+								var responseText;
+								responseText = xhr.responseText;
+								if(responseText){
+									document.getElementById("error").innerHTML = errorType + " : " + exception + "---Error message: "+ responseText;
+								}
+								else{
+									document.getElementById("error").innerHTML = "Error: Invalid IP or port!";
+								}
+							}
+						
+                        });//end of .ajax
+						}//end of try block
+						catch(e){
+							document.getElementById("error").innerHTML = "Exception: " + e;
+						}
+            }
+            else{
+				alert("Error: All fields of the page must be fill in order to add a contact!");
+            }
+        
+        });//end of add contact block
+		
+        });
+        
+        function make_base_auth(user, password) {
+			var tok = user + ':' + password;
+			var hash =  (tok);
+			return "Basic " + hash;
+		}
+        
+        function onLoadFunction() {
+        	var role=sessionStorage.getItem("role");;
+        	if(role=="simpleUser"){
+        		document.getElementById("UC").disabled = true;
+        		document.getElementById("DC").disabled = true;
+        	}
+        	if(role=="guest"){
+        		document.getElementById("AC").disabled = true;
+        		document.getElementById("UC").disabled = true;
+        		document.getElementById("DC").disabled = true;
+        	}
+        	
+        }
+        </script>
+<div id="div1">
+</div>
+</body>
+</html>
